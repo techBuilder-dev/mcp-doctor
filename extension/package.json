@@ -1,0 +1,37 @@
+{
+  "name": "mcp-doctor",
+  "displayName": "MCP Doctor",
+  "description": "Validate claude_desktop_config.json and .cursor/mcp.json with inline diagnostics — the same checks as mcpdoctor, right in your editor.",
+  "version": "1.0.0",
+  "publisher": "mcp-doctor",
+  "license": "MIT",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Linters"],
+  "keywords": ["mcp", "model context protocol", "claude", "cursor", "config"],
+  "activationEvents": [
+    "onLanguage:json",
+    "onLanguage:jsonc"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "mcpDoctor.validate", "title": "MCP Doctor: Validate Config" }
+    ],
+    "configuration": {
+      "title": "MCP Doctor",
+      "properties": {
+        "mcpDoctor.validateOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Re-validate MCP config files on save."
+        },
+        "mcpDoctor.targetOS": {
+          "type": "string",
+          "enum": ["auto", "mac", "win", "linux"],
+          "default": "auto",
+          "description": "Target OS for PATH / path-specific warnings."
+        }
+      }
+    }
+  }
+}
