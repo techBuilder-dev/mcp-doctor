@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP Doctor — Rule Reference</title>
+<meta name="description" content="Every check MCP Doctor runs on your claude_desktop_config.json or .cursor/mcp.json, with what each issue means and how to fix it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0a; --surface:#111; --surface2:#1a1a1a; --border:#2a2a2a; --border2:#3a3a3a;
+    --text:#f0f0f0; --muted:#888; --faint:#555; --accent:#00ff9d;
+    --red:#ff5555; --yellow:#ffcc00; --blue:#4d9fff;
+    --mono:'Berkeley Mono','JetBrains Mono',ui-monospace,Menlo,monospace; --display:'Syne',system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:var(--display); line-height:1.6; }
+  .wrap { max-width:820px; margin:0 auto; padding:3rem 2rem 6rem; }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .top { display:flex; align-items:center; gap:12px; margin-bottom:0.5rem; }
+  .logo { width:36px; height:36px; background:var(--accent); border-radius:9px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(0,255,157,0.35); }
+  .logo svg { width:20px; height:20px; color:#000; }
+  h1 { font-size:1.7rem; font-weight:800; letter-spacing:-0.03em; }
+  h1 span { color:var(--accent); }
+  .sub { color:var(--muted); font-size:0.95rem; margin-bottom:0.6rem; }
+  .back { font-family:var(--mono); font-size:0.78rem; }
+  .legend { display:flex; gap:8px; flex-wrap:wrap; margin:1.5rem 0 2.5rem; }
+  .tag { font-family:var(--mono); font-size:0.7rem; padding:4px 10px; border-radius:100px; }
+  .tag.error { background:rgba(255,85,85,0.12); color:var(--red); border:1px solid rgba(255,85,85,0.3); }
+  .tag.warning { background:rgba(255,204,0,0.10); color:var(--yellow); border:1px solid rgba(255,204,0,0.3); }
+  .tag.info { background:rgba(77,159,255,0.10); color:var(--blue); border:1px solid rgba(77,159,255,0.3); }
+  .rule { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.2rem 1.4rem; margin-bottom:1rem; scroll-margin-top:20px; }
+  .rule.error { border-left:3px solid var(--red); }
+  .rule.warning { border-left:3px solid var(--yellow); }
+  .rule.info { border-left:3px solid var(--blue); }
+  .rule h2 { font-size:1.05rem; font-weight:700; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .rule .rid { font-family:var(--mono); font-size:0.68rem; color:var(--faint); background:var(--surface2); border:1px solid var(--border); padding:2px 7px; border-radius:4px; }
+  .rule p { color:var(--muted); font-size:0.9rem; margin-top:0.5rem; }
+  .rule .fix { color:var(--text); font-size:0.9rem; margin-top:0.5rem; }
+  .rule .fix b { color:var(--accent); font-weight:600; }
+  code { font-family:var(--mono); font-size:0.82rem; background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:1px 6px; color:var(--text); }
+  footer { margin-top:3rem; padding-top:2rem; border-top:1px solid var(--border); color:var(--faint); font-size:0.8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg></div>
+    <h1>MCP <span>Doctor</span> — Rule Reference</h1>
+  </div>
+  <p class="sub">Every check MCP Doctor runs on a <code>claude_desktop_config.json</code> or <code>.cursor/mcp.json</code>, what each means, and how to fix it.</p>
+  <p class="back"><a href="index.html">← Back to the validator</a></p>
+
+  <div class="legend">
+    <span class="tag error">error — breaks the server</span>
+    <span class="tag warning">warning — likely to bite you</span>
+    <span class="tag info">info — heads-up</span>
+  </div>
+
+  <div class="rule error" id="missing-top-level"><h2>Missing <code>mcpServers</code> key <span class="rid">missing-top-level</span></h2>
+    <p>Every config must have a top-level <code>mcpServers</code> object. It is the root key all server definitions live under.</p>
+    <p class="fix"><b>Fix:</b> wrap your servers under <code>{ "mcpServers": { ... } }</code>.</p></div>
+
+  <div class="rule error" id="servers-not-object"><h2><code>mcpServers</code> is an array <span class="rid">servers-not-object</span></h2>
+    <p>Servers are named keys inside an object, not array entries. Using <code>[ ... ]</code> instead of <code>{ ... }</code> is a common mistake.</p>
+    <p class="fix"><b>Fix:</b> use an object keyed by server name.</p></div>
+
+  <div class="rule error" id="server-not-object"><h2>Server is not a valid object <span class="rid">server-not-object</span></h2>
+    <p>Each server value must be an object with at least a <code>command</code> or <code>url</code>.</p>
+    <p class="fix"><b>Fix:</b> make the value an object, e.g. <code>{ "command": "npx", "args": [...] }</code>.</p></div>
+
+  <div class="rule error" id="no-command-or-url"><h2>No <code>command</code> or <code>url</code> <span class="rid">no-command-or-url</span></h2>
+    <p>An active server needs either a <code>command</code> (stdio) or a <code>url</code> (HTTP). Without one, the client cannot connect.</p>
+    <p class="fix"><b>Fix:</b> add a command for a local process or a url for a remote server.</p></div>
+
+  <div class="rule error" id="args-not-array"><h2><code>args</code> is not an array <span class="rid">args-not-array</span></h2>
+    <p><code>args</code> must be an array of strings, even for a single argument. A bare string causes a startup failure.</p>
+    <p class="fix"><b>Fix:</b> wrap args in <code>[ ]</code>.</p></div>
+
+  <div class="rule error" id="env-not-object"><h2><code>env</code> is not an object <span class="rid">env-not-object</span></h2>
+    <p><code>env</code> must be a flat key-value object mapping variable names to values.</p>
+    <p class="fix"><b>Fix:</b> use <code>"env": { "KEY": "value" }</code>.</p></div>
+
+  <div class="rule error" id="duplicate-server"><h2>Duplicate server name <span class="rid">duplicate-server</span></h2>
+    <p>Two servers share a name. The later one silently overwrites the first — JSON parsers keep only the last duplicate key, so the first server vanishes with no error.</p>
+    <p class="fix"><b>Fix:</b> give each server a unique name (e.g. <code>filesystem-home</code>, <code>filesystem-work</code>).</p></div>
+
+  <div class="rule error" id="deprecated-sse"><h2>Deprecated SSE transport <span class="rid">deprecated-sse</span></h2>
+    <p>The SSE transport was deprecated in MCP spec 2025-03-26. Claude Desktop and Cursor moved to Streamable HTTP. SSE servers often fail silently with a bare "Connection closed".</p>
+    <p class="fix"><b>Fix:</b> move the server to Streamable HTTP and use <code>"transport": "http"</code> with a <code>/mcp</code> endpoint.</p></div>
+
+  <div class="rule error" id="filesystem-no-path"><h2>Filesystem server missing directory path <span class="rid">filesystem-no-path</span></h2>
+    <p>The filesystem server requires at least one allowed directory argument. Without it the server starts but rejects all file operations with an opaque error.</p>
+    <p class="fix"><b>Fix:</b> add a path after the package, e.g. <code>"/Users/you/documents"</code>.</p></div>
+
+  <div class="rule error" id="windows-path-separators"><h2>Windows path with unescaped backslashes <span class="rid">windows-path-separators</span></h2>
+    <p>JSON requires doubled backslashes. <code>"C:\Users\me"</code> is parsed as escape sequences (<code>\t</code> = tab, <code>\n</code> = newline), corrupting the path — or failing to parse entirely.</p>
+    <p class="fix"><b>Fix:</b> double every backslash (<code>C:\\Users\\me</code>) or use forward slashes.</p></div>
+
+  <div class="rule warning" id="sse-url-pattern"><h2>URL ends in <code>/sse</code> <span class="rid">sse-url-pattern</span></h2>
+    <p>A <code>/sse</code> endpoint usually means a legacy SSE server. Modern Streamable HTTP servers use <code>/mcp</code>. This commonly causes "Connection closed".</p>
+    <p class="fix"><b>Fix:</b> point at the server's Streamable HTTP endpoint instead.</p></div>
+
+  <div class="rule warning" id="empty-env-var"><h2>Empty environment variable <span class="rid">empty-env-var</span></h2>
+    <p>An env key exists but its value is <code>""</code>. The server starts, then any operation needing that key fails with a cryptic auth or "undefined" error.</p>
+    <p class="fix"><b>Fix:</b> set the real value (MCP Doctor's "Auto-fix" can drop in a placeholder).</p></div>
+
+  <div class="rule warning" id="npx-missing-y-flag"><h2><code>npx</code> without <code>-y</code> <span class="rid">npx-missing-y-flag</span></h2>
+    <p>Without <code>-y</code>, npx prompts "Need to install the following packages?" interactively. The client subprocess has no TTY to answer, so the server hangs silently.</p>
+    <p class="fix"><b>Fix:</b> add <code>-y</code> as the first npx argument.</p></div>
+
+  <div class="rule warning" id="http-url-not-localhost"><h2>Remote server over plain HTTP <span class="rid">http-url-not-localhost</span></h2>
+    <p>A non-localhost <code>http://</code> URL sends your tool calls and responses in the clear, exposing them to network eavesdropping.</p>
+    <p class="fix"><b>Fix:</b> use <code>https://</code> for any remote server.</p></div>
+
+  <div class="rule warning" id="path-with-tilde"><h2>Path uses <code>~</code> <span class="rid">path-with-tilde</span></h2>
+    <p>Tilde expansion is a shell feature. Clients launch MCP servers directly (no shell), so <code>~/</code> may not expand to your home directory.</p>
+    <p class="fix"><b>Fix:</b> use the absolute path.</p></div>
+
+  <div class="rule warning" id="package-typo"><h2>Possible package typo <span class="rid">package-typo</span></h2>
+    <p>The package name is not a known MCP server but is one or two characters away from one (e.g. <code>server-brave-serch</code> → <code>server-brave-search</code>). A typo means the package never installs and the server silently fails.</p>
+    <p class="fix"><b>Fix:</b> correct the package name to the suggested match.</p></div>
+
+  <div class="rule warning" id="tool-count-ceiling"><h2>Tool count ceiling <span class="rid">tool-count-ceiling</span></h2>
+    <p>Cursor has a soft ceiling of ~40 active tools across all servers. With 8+ active servers (avg ~5 tools each) you can exceed it; tools beyond the limit are silently dropped and the agent never knows.</p>
+    <p class="fix"><b>Fix:</b> park servers you rarely use with <code>"disabled": true</code>.</p></div>
+
+  <div class="rule info" id="missing-required-env"><h2>Missing a known required key <span class="rid">missing-required-env</span></h2>
+    <p>A recognized server (e.g. <code>server-github</code>) is missing the env var it normally needs to authenticate (e.g. <code>GITHUB_PERSONAL_ACCESS_TOKEN</code>).</p>
+    <p class="fix"><b>Fix:</b> add the expected key to the server's <code>env</code> block.</p></div>
+
+  <div class="rule info" id="disabled-server"><h2>Server is disabled <span class="rid">disabled-server</span></h2>
+    <p>The server has <code>"disabled": true</code> and will not load. Purely informational.</p>
+    <p class="fix"><b>Fix:</b> remove the flag or set it to <code>false</code> to re-enable.</p></div>
+
+  <div class="rule info" id="uvx-command"><h2><code>uvx</code> command <span class="rid">uvx-command</span></h2>
+    <p>uvx needs the uv Python package manager on your PATH. On Windows it sometimes needs the full path to <code>uvx.exe</code>.</p>
+    <p class="fix"><b>Fix:</b> install uv; verify with <code>uvx --version</code>.</p></div>
+
+  <div class="rule info" id="node-path-check"><h2><code>node</code> without a full path <span class="rid">node-path-check</span></h2>
+    <p>Claude Desktop on macOS/Linux doesn't always inherit your shell PATH. If node came from nvm/fnm, a bare <code>node</code> can be "command not found".</p>
+    <p class="fix"><b>Fix:</b> use the absolute path (find it with <code>which node</code>).</p></div>
+
+  <div class="rule info" id="docker-command"><h2><code>docker</code> command <span class="rid">docker-command</span></h2>
+    <p>Docker-based servers need Docker Desktop running, or they fail with <code>spawn docker ENOENT</code>.</p>
+    <p class="fix"><b>Fix:</b> start Docker Desktop before your client.</p></div>
+
+  <div class="rule info" id="python-module-path"><h2>Python <code>-m</code> module <span class="rid">python-module-path</span></h2>
+    <p>A bare <code>python3 -m ...</code> may pick up the wrong interpreter if the server needs a specific virtualenv.</p>
+    <p class="fix"><b>Fix:</b> point <code>command</code> at the venv's Python binary.</p></div>
+
+  <div class="rule info" id="schema-version-check"><h2>References a schema version <span class="rid">schema-version-check</span></h2>
+    <p>The config carries a <code>version</code> or <code>$schema</code> field. These differ between Claude Desktop and Cursor.</p>
+    <p class="fix"><b>Fix:</b> confirm it matches your client.</p></div>
+
+  <footer>MCP Doctor — 100% client-side. <a href="index.html">Validate a config →</a></footer>
+</div>
+</body>
+</html>
